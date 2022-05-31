@@ -47,6 +47,18 @@ app.post("/login", (res, req) => {
   return res.status(401).send("Password is incorrect");
 });
 
+app.get("/user_profile", (req, res) => {
+  const token = req.headers["authorization"];
+
+  if (!token) return res.status(401).send("Access denied");
+
+  try {
+    const { username } = jwt.verify(token, accessTokenSecret);
+    return res.send({ username });
+  } catch (err) {
+    return res.status(401).send("Access denied");
+  }
+});
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
