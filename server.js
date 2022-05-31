@@ -46,7 +46,7 @@ app.post("/login", (res, req) => {
   }
   return res.status(401).send("Password is incorrect");
 });
-
+//user_profile endpoint
 app.get("/user_profile", (req, res) => {
   const token = req.headers["authorization"];
 
@@ -57,6 +57,26 @@ app.get("/user_profile", (req, res) => {
     return res.send({ username });
   } catch (err) {
     return res.status(401).send("Access denied");
+  }
+});
+
+//renewing the access_token, call the renew_access_token
+app.post("/renew_access_token", (res, req) => {
+  const { refreshToken } = req.body;
+  try {
+    const details = jwt.verify(refreshToken, refreshTokenSecret);
+    return res.send({
+      accessToken: jwt.sign(
+        { ...details, exp: Math.floor(Date.now() / 1000) + 20 },
+        accessTokenSecret
+      ),
+      refreshToken: jwt.sign(
+        { username: details.username, exp: Math.floor(Date.now() / 1000) + 90 },
+        refreshTokenSecret
+      ),
+    });
+  } catch (err) {
+    return res.status(403).send("Access denied");
   }
 });
 app.listen(port, () => {
